@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
-import * as TictactoeCdk from '../lib/tictactoe-cdk-stack';
+import * as TictactoeCdk from '../lib/tictactoe-app-cdk-stack';
 
 test('Empty Stack', () => {
     const app = new cdk.App();
