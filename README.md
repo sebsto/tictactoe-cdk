@@ -23,7 +23,7 @@ Be sure to have a CLI config with admin permission and using `us-east-1` as defa
 To deploy the stack across the two regions, just type :
 
 ```zsh 
-cdk deploy --all
+cdk deploy --all --outputs-file out.json
 ```
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
