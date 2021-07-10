@@ -1,4 +1,4 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { Stack, StackProps, CfnOutput } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { aws_dynamodb as dynamodb } from 'aws-cdk-lib';
 
@@ -8,6 +8,7 @@ export interface DynamoDBProps extends StackProps {
 
 export class TictactoeDatabaseCdkStack extends Stack {
 
+  // this is class level because it is shared with the app stack
   public table : dynamodb.Table
 
   constructor(scope: Construct, id: string, props: DynamoDBProps) {
@@ -32,5 +33,8 @@ export class TictactoeDatabaseCdkStack extends Stack {
       sortKey: { name: 'StatusDate', type: dynamodb.AttributeType.STRING }
     });
 
+    // output for easy integration with other AWS services 
+    new CfnOutput(this, 'ARN-LoadBalancer', { value: this.table.tableArn });
+    
   }
 }

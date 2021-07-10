@@ -141,5 +141,8 @@ export class TictactoeAppCdkStack extends Stack {
     // output the Load Balancer DNS Name for easy retrieval
     new CfnOutput(this, 'LoadBalancerDNSName', { value: lb.loadBalancerDnsName });
 
+    // output for easy integration with other AWS services 
+    new CfnOutput(this, 'ARN-LoadBalancer', { value: lb.loadBalancerArn });
+    new CfnOutput(this, 'ARN-AutoScalingGroup', { value: asg.autoScalingGroupArn });
   }
 }
