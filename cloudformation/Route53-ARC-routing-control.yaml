@@ -79,5 +79,10 @@ Resources:
 Outputs:
   ClusterArn:
     Value: !Ref Cluster
+  
+  HealthCheckIdEast:
+    Value: !Ref HealthCheckCell1
 
+  HealthCheckIdWest:
+    Value: !Ref HealthCheckCell2
   

@@ -123,8 +123,4 @@ Resources:
       ReadinessCheckName: !Sub ${ProjectId}-ReadinessCheck-DynamoDB
       ResourceSetName: !Ref ResourceSetDynamoDB
 
-Outputs:
-  ClusterArn:
-    Value: !Ref RecoveryGroup
-
   
