@@ -62,20 +62,19 @@ Resources:
         Threshold: 1
         Inverted: false
 
-  # SafetyRuleAssertionCanary:
-  #   Type: AWS::Route53RecoveryControl::SafetyRule
-  #   Properties:
-  #     Name: !Sub ${ProjectId}-SafetyRuleAssertionCanary
-  #     ControlPanelArn: !Ref ControlPanel
-  #     AssertionRule:
-  #       WaitPeriodMs: 10
-  #       AssertedControls: 
-  #         - !Ref RoutingControlCell1
-  #         - !Ref RoutingControlCell2
-  #     RuleConfig:
-  #       Type: OR
-  #       Threshold: 5
-  #       Inverted: False
+  HealthCheckCell1:
+    Type: AWS::Route53::HealthCheck
+    Properties:
+      HealthCheckConfig:
+        Type: "RECOVERY_CONTROL"
+        RoutingControlArn: !Ref RoutingControlCell1
+
+  HealthCheckCell2:
+    Type: AWS::Route53::HealthCheck
+    Properties:
+      HealthCheckConfig:
+        Type: "RECOVERY_CONTROL"
+        RoutingControlArn: !Ref RoutingControlCell2
 
 Outputs:
   ClusterArn:
