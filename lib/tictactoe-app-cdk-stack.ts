@@ -142,7 +142,8 @@ export class TictactoeAppCdkStack extends Stack {
     new CfnOutput(this, 'LoadBalancerDNSName', { value: lb.loadBalancerDnsName });
 
     // output for easy integration with other AWS services 
-    new CfnOutput(this, 'ARN-LoadBalancer', { value: lb.loadBalancerArn });
-    new CfnOutput(this, 'ARN-AutoScalingGroup', { value: asg.autoScalingGroupArn });
+    new CfnOutput(this, 'ARNLoadBalancer', { value: lb.loadBalancerArn });
+    new CfnOutput(this, 'HostedZoneLoadBalancer', { value: lb.loadBalancerCanonicalHostedZoneId });
+    new CfnOutput(this, 'ARNAutoScalingGroup', { value: asg.autoScalingGroupArn });
   }
 }

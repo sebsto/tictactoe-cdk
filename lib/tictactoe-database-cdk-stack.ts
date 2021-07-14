@@ -34,7 +34,7 @@ export class TictactoeDatabaseCdkStack extends Stack {
     });
 
     // output for easy integration with other AWS services 
-    new CfnOutput(this, 'ARN-LoadBalancer', { value: this.table.tableArn });
+    new CfnOutput(this, 'ARNDatabaseTable', { value: this.table.tableArn });
     
   }
 }
