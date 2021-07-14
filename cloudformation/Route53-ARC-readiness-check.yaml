@@ -1,0 +1,130 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'This template creates an Amazon Route53 Application Recovery Controller Readiness Check for the Tic Tac Toe demo app'
+Parameters:
+  Region1:
+    Default: us-east-1
+    Description: The region for the first cell
+    Type: String 
+
+  Region2:
+    Default: us-west-2
+    Description: The region for the second cell
+    Type: String 
+
+  LoadBalancer1: 
+    Default: arn:aws:elasticloadbalancing:us-east-1:486652066693:loadbalancer/app/Ticta-TicTa-14EPCX666HUKP/7d51005ff8a45f56
+    Description: The ARN of the Application Load Balancer in cell 1
+    Type: String 
+
+  LoadBalancer2: 
+    Default: arn:aws:elasticloadbalancing:us-west-2:486652066693:loadbalancer/app/Ticta-TicTa-1KRO5OZLP1OU4/5ca12b5c4d3f7a0b
+    Description: The ARN of the Application Load Balancer in cell 2
+    Type: String 
+
+  AutoScalingGroup1: 
+    Default: arn:aws:autoscaling:us-east-1:486652066693:autoScalingGroup:*:autoScalingGroupName/TictactoeAppCdkStack-us-east-1-TicTacToeASGCBDED12E-1OBELUEWUDT4N
+    Description: The ARN of the Auto Scaling Group in cell 1
+    Type: String 
+
+  AutoScalingGroup2: 
+    Default: arn:aws:autoscaling:us-west-2:486652066693:autoScalingGroup:*:autoScalingGroupName/TictactoeAppCdkStack-us-west-2-TicTacToeASGCBDED12E-7FN50WYF2ZH2
+    Description: The ARN of the Auto Scaling Group in cell 2
+    Type: String 
+
+  DynamoDBTable:
+    Default: arn:aws:dynamodb:us-west-2:486652066693:table/Games
+    Description: The ARN of the DynamoDB Global Table
+    Type: String 
+
+  ProjectId:
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: Must begin with a letter and contain only alphanumeric
+      characters.
+    Default: TicTacToe
+    Description: The name of the project
+    MaxLength: '64'
+    MinLength: '1'
+    Type: String
+
+Resources:
+
+  Cell1:
+    Type: AWS::Route53RecoveryReadiness::Cell
+    Properties:
+      CellName: !Sub ${ProjectId}-Cell1-${Region1}
+
+  Cell2:
+    Type: AWS::Route53RecoveryReadiness::Cell
+    Properties:
+      CellName: !Sub ${ProjectId}-Cell2-${Region2}
+
+  RecoveryGroup:
+    Type: AWS::Route53RecoveryReadiness::RecoveryGroup
+    Properties:
+      RecoveryGroupName: !Sub ${ProjectId}-RecoveryGroup
+      Cells: 
+        - !GetAtt Cell1.CellArn
+        - !GetAtt Cell2.CellArn
+
+  ResourceSetALB:
+    Type: AWS::Route53RecoveryReadiness::ResourceSet
+    Properties:
+        ResourceSetName: !Sub ${ProjectId}-ResourceSet-ALB
+        Resources: 
+          - ResourceArn: !Ref LoadBalancer1
+            ReadinessScopes:
+              - !GetAtt Cell1.CellArn        
+          - ResourceArn: !Ref LoadBalancer2
+            ReadinessScopes:
+              - !GetAtt Cell2.CellArn        
+        
+        ResourceSetType: AWS::ElasticLoadBalancingV2::LoadBalancer
+
+  ResourceSetASG:
+    Type: AWS::Route53RecoveryReadiness::ResourceSet
+    Properties:
+        ResourceSetName: !Sub ${ProjectId}-ResourceSet-ASG
+        Resources: 
+          - ResourceArn: !Ref AutoScalingGroup1
+            ReadinessScopes:
+              - !GetAtt Cell1.CellArn        
+          - ResourceArn: !Ref AutoScalingGroup2
+            ReadinessScopes:
+              - !GetAtt Cell2.CellArn        
+        
+        ResourceSetType: AWS::AutoScaling::AutoScalingGroup
+
+  ResourceSetDynamoDB:
+    Type: AWS::Route53RecoveryReadiness::ResourceSet
+    Properties:
+        ResourceSetName: !Sub ${ProjectId}-ResourceSet-DDB
+        Resources: 
+          - ResourceArn: !Ref DynamoDBTable
+            ReadinessScopes:
+              - !GetAtt Cell1.CellArn        
+        
+        ResourceSetType: AWS::DynamoDB::Table
+
+  ReadinessCheckALB:
+    Type: AWS::Route53RecoveryReadiness::ReadinessCheck
+    Properties:
+      ReadinessCheckName: !Sub ${ProjectId}-ReadinessCheck-ALB
+      ResourceSetName: !Ref ResourceSetALB
+
+  ReadinessCheckASG:
+    Type: AWS::Route53RecoveryReadiness::ReadinessCheck
+    Properties:
+      ReadinessCheckName: !Sub ${ProjectId}-ReadinessCheck-ASG
+      ResourceSetName: !Ref ResourceSetASG
+
+  ReadinessCheckDynamoDB:
+    Type: AWS::Route53RecoveryReadiness::ReadinessCheck
+    Properties:
+      ReadinessCheckName: !Sub ${ProjectId}-ReadinessCheck-DynamoDB
+      ResourceSetName: !Ref ResourceSetDynamoDB
+
+Outputs:
+  ClusterArn:
+    Value: !Ref RecoveryGroup
+
+  

@@ -1,0 +1,7 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'This template creates an Amazon Route53 Application Recovery Controller Readiness Check for the Tic Tac Toe demo app'
+Parameters:
+Resources:
+Outputs:
+
+  
