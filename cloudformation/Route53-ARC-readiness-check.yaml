@@ -12,27 +12,22 @@ Parameters:
     Type: String 
 
   LoadBalancer1: 
-    Default: arn:aws:elasticloadbalancing:us-east-1:486652066693:loadbalancer/app/Ticta-TicTa-14EPCX666HUKP/7d51005ff8a45f56
     Description: The ARN of the Application Load Balancer in cell 1
     Type: String 
 
   LoadBalancer2: 
-    Default: arn:aws:elasticloadbalancing:us-west-2:486652066693:loadbalancer/app/Ticta-TicTa-1KRO5OZLP1OU4/5ca12b5c4d3f7a0b
     Description: The ARN of the Application Load Balancer in cell 2
     Type: String 
 
   AutoScalingGroup1: 
-    Default: arn:aws:autoscaling:us-east-1:486652066693:autoScalingGroup:*:autoScalingGroupName/TictactoeAppCdkStack-us-east-1-TicTacToeASGCBDED12E-1OBELUEWUDT4N
     Description: The ARN of the Auto Scaling Group in cell 1
     Type: String 
 
   AutoScalingGroup2: 
-    Default: arn:aws:autoscaling:us-west-2:486652066693:autoScalingGroup:*:autoScalingGroupName/TictactoeAppCdkStack-us-west-2-TicTacToeASGCBDED12E-7FN50WYF2ZH2
     Description: The ARN of the Auto Scaling Group in cell 2
     Type: String 
 
   DynamoDBTable:
-    Default: arn:aws:dynamodb:us-west-2:486652066693:table/Games
     Description: The ARN of the DynamoDB Global Table
     Type: String 
 
