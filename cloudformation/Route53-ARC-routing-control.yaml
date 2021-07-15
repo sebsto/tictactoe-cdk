@@ -1,6 +1,11 @@
 #
 # This template demonstrates how to configure Amazon Route53 Application Recovery Controller Routing Controls
 #
+# ***************************************************
+# RUNNING THIS TEMPLATE COSTS $60/day ($2.5/hour) 
+# BE SURE TO DELETE THIS STACK WHEN NO LONGER NEEDED
+# ***************************************************
+#
 # Note that Healthchecks for CloudFormation will be available as a quick follow-up after launch.
 # For now on, please create the Route53 Application Recovery Controller healthchecks in the console.
 #
