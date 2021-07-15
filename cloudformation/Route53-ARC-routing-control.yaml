@@ -1,3 +1,13 @@
+#
+# This template demonstrates how to configure Amazon Route53 Application Recovery Controller Routing Controls
+#
+# Note that Healthchecks for CloudFormation will be available as a quick follow-up after launch.
+# For now on, please create the Route53 Application Recovery Controller healthchecks in the console.
+#
+# For a full description of how it works, please read
+# https://aws.amazon.com/fr/blogs/aws/amazon-route-53-application-recovery-controller/
+#
+
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Amazon Route53 Application Recovery Controller cluster and routing control for the Tic Tac Toe Demo app'
 Parameters:
@@ -22,16 +32,29 @@ Parameters:
     Type: String
 
 Resources:
+
+#
+# The Application Recovery Controller cluster
+#
+
   Cluster:
     Type: AWS::Route53RecoveryControl::Cluster
     Properties:
       Name: !Sub ${ProjectId}-Cluster
+
+#
+# The Application Recovery Controller control panel
+#
 
   ControlPanel:
     Type: AWS::Route53RecoveryControl::ControlPanel
     Properties:
       Name: !Sub ${ProjectId}-ControlPanel
       ClusterArn: !Ref Cluster
+
+#
+# The Application Recovery Controller routing controls
+#
 
   RoutingControlCell1:
     Type: AWS::Route53RecoveryControl::RoutingControl
@@ -46,6 +69,10 @@ Resources:
       Name: !Sub ${ProjectId}-Cell2-${Region2}
       ClusterArn: !Ref Cluster
       ControlPanelArn: !Ref ControlPanel
+
+#
+# The Application Recovery Controller safety rules
+#
 
   SafetyRuleMinCellsActive:
     Type: AWS::Route53RecoveryControl::SafetyRule
@@ -62,27 +89,34 @@ Resources:
         Threshold: 1
         Inverted: false
 
-  HealthCheckCell1:
-    Type: AWS::Route53::HealthCheck
-    Properties:
-      HealthCheckConfig:
-        Type: "RECOVERY_CONTROL"
-        RoutingControlArn: !Ref RoutingControlCell1
+#
+# The Application Recovery Controller healthchecks
+#
+# Note that Healthchecks for CloudFormation will be available as a quick follow-up after launch.
+# I will update this template as soon as available.
+#
 
-  HealthCheckCell2:
-    Type: AWS::Route53::HealthCheck
-    Properties:
-      HealthCheckConfig:
-        Type: "RECOVERY_CONTROL"
-        RoutingControlArn: !Ref RoutingControlCell2
+  # HealthCheckCell1:
+  #   Type: AWS::Route53::HealthCheck
+  #   Properties:
+  #     HealthCheckConfig:
+  #       Type: "RECOVERY_CONTROL"
+  #       RoutingControlArn: !Ref RoutingControlCell1
+
+  # HealthCheckCell2:
+  #   Type: AWS::Route53::HealthCheck
+  #   Properties:
+  #     HealthCheckConfig:
+  #       Type: "RECOVERY_CONTROL"
+  #       RoutingControlArn: !Ref RoutingControlCell2
 
 Outputs:
   ClusterArn:
     Value: !Ref Cluster
   
-  HealthCheckIdEast:
-    Value: !Ref HealthCheckCell1
+  # HealthCheckIdEast:
+  #   Value: !Ref HealthCheckCell1
 
-  HealthCheckIdWest:
-    Value: !Ref HealthCheckCell2
+  # HealthCheckIdWest:
+  #   Value: !Ref HealthCheckCell2
   

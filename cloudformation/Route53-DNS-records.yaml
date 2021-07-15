@@ -1,3 +1,13 @@
+#
+# This template demonstrates how to configure Amazon Route53 Failover record sets that use 
+# Amazon Route53 Application Recovery Controller (ARC) healthchecks
+#
+# Note that Route53 ARC healthcheck will be available in Cloudformation soon after the launch.
+# For now on, create the Route53 ARC healthchecks in the console and report the healthcheck IDs here as parameters
+#
+# For a full description of how it works, please read
+# https://aws.amazon.com/fr/blogs/aws/amazon-route-53-application-recovery-controller/
+#
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'This template creates Amazon Route53 DNS Failover Records with healthcheck for the Tic Tac Toe demo app'
 Parameters:
@@ -44,6 +54,11 @@ Parameters:
     Type: String
 
 Resources:
+
+#
+# The PRIMARY and SECONDARY failover DNS records.
+# These are A records as Aliases to the Load Balancer DNS name.
+#
   FrontEndAliasRecordPrimary:
       Type: AWS::Route53::RecordSet
       Properties:

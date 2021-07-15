@@ -1,3 +1,10 @@
+
+#
+# This template demonstrates how to configure Amazon Route53 Application Recovery Controller Readiness Checks
+# For a full description of how it works, please read
+# https://aws.amazon.com/fr/blogs/aws/amazon-route-53-application-recovery-controller/
+#
+
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'This template creates an Amazon Route53 Application Recovery Controller Readiness Check for the Tic Tac Toe demo app'
 Parameters:
@@ -43,6 +50,9 @@ Parameters:
 
 Resources:
 
+#
+# The Application Recovery Controller cells
+#
   Cell1:
     Type: AWS::Route53RecoveryReadiness::Cell
     Properties:
@@ -53,6 +63,9 @@ Resources:
     Properties:
       CellName: !Sub ${ProjectId}-Cell2-${Region2}
 
+#
+# The Application Recovery Controller recovery groups
+#
   RecoveryGroup:
     Type: AWS::Route53RecoveryReadiness::RecoveryGroup
     Properties:
@@ -61,6 +74,9 @@ Resources:
         - !GetAtt Cell1.CellArn
         - !GetAtt Cell2.CellArn
 
+#
+# The Application Recovery Controller resource set
+#
   ResourceSetALB:
     Type: AWS::Route53RecoveryReadiness::ResourceSet
     Properties:
@@ -100,6 +116,9 @@ Resources:
         
         ResourceSetType: AWS::DynamoDB::Table
 
+#
+# The Application Recovery Controller readiness checks
+#
   ReadinessCheckALB:
     Type: AWS::Route53RecoveryReadiness::ReadinessCheck
     Properties:
