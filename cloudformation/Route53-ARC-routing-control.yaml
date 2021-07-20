@@ -6,9 +6,6 @@
 # BE SURE TO DELETE THIS STACK WHEN NO LONGER NEEDED
 # ***************************************************
 #
-# Note that Healthchecks for CloudFormation will be available as a quick follow-up after launch.
-# For now on, please create the Route53 Application Recovery Controller healthchecks in the console.
-#
 # For a full description of how it works, please read
 # https://aws.amazon.com/fr/blogs/aws/amazon-route-53-application-recovery-controller/
 #
@@ -97,23 +94,20 @@ Resources:
 #
 # The Application Recovery Controller healthchecks
 #
-# Note that Healthchecks for CloudFormation will be available as a quick follow-up after launch.
-# I will update this template as soon as available.
-#
 
-  # HealthCheckCell1:
-  #   Type: AWS::Route53::HealthCheck
-  #   Properties:
-  #     HealthCheckConfig:
-  #       Type: "RECOVERY_CONTROL"
-  #       RoutingControlArn: !Ref RoutingControlCell1
+  HealthCheckCell1:
+    Type: AWS::Route53::HealthCheck
+    Properties:
+      HealthCheckConfig:
+        Type: "RECOVERY_CONTROL"
+        RoutingControlArn: !Ref RoutingControlCell1
 
-  # HealthCheckCell2:
-  #   Type: AWS::Route53::HealthCheck
-  #   Properties:
-  #     HealthCheckConfig:
-  #       Type: "RECOVERY_CONTROL"
-  #       RoutingControlArn: !Ref RoutingControlCell2
+  HealthCheckCell2:
+    Type: AWS::Route53::HealthCheck
+    Properties:
+      HealthCheckConfig:
+        Type: "RECOVERY_CONTROL"
+        RoutingControlArn: !Ref RoutingControlCell2
 
 Outputs:
   ClusterArn:
