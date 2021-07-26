@@ -43,13 +43,3 @@ aws --region $REGION cloudformation create-stack               \
                  ParameterKey=DNSDomainName,ParameterValue=$DNS_HOSTED_ZONE_NAME \
                  ParameterKey=DNSHealthcheckIdEast,ParameterValue=$ROUTE53_HEALTHCHECKID_CELL1 \
                  ParameterKey=DNSHealthcheckIdWest,ParameterValue=$ROUTE53_HEALTHCHECKID_CELL2 
-
-function check_dependencies() {
-    # check dependency on jq
-    which jq > /dev/null
-    if [ $? != 0 ];
-    then
-        echo 'jq must be installed.\nOn Mac, type "brew install jq".\nOtherwise check https://stedolan.github.io/jq/download/'
-        exit -1
-    fi    
-}
