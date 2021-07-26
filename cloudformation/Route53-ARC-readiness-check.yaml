@@ -77,6 +77,8 @@ Resources:
 #
 # The Application Recovery Controller resource set
 #
+
+# the application load balancers 
   ResourceSetALB:
     Type: AWS::Route53RecoveryReadiness::ResourceSet
     Properties:
@@ -91,6 +93,7 @@ Resources:
         
         ResourceSetType: AWS::ElasticLoadBalancingV2::LoadBalancer
 
+# the auto scaling groups 
   ResourceSetASG:
     Type: AWS::Route53RecoveryReadiness::ResourceSet
     Properties:
@@ -105,6 +108,7 @@ Resources:
         
         ResourceSetType: AWS::AutoScaling::AutoScalingGroup
 
+# the DynamoDB table
   ResourceSetDynamoDB:
     Type: AWS::Route53RecoveryReadiness::ResourceSet
     Properties:
@@ -119,18 +123,22 @@ Resources:
 #
 # The Application Recovery Controller readiness checks
 #
+
+# the application load balancers 
   ReadinessCheckALB:
     Type: AWS::Route53RecoveryReadiness::ReadinessCheck
     Properties:
       ReadinessCheckName: !Sub ${ProjectId}-ReadinessCheck-ALB
       ResourceSetName: !Ref ResourceSetALB
 
+# the auto scaling groups 
   ReadinessCheckASG:
     Type: AWS::Route53RecoveryReadiness::ReadinessCheck
     Properties:
       ReadinessCheckName: !Sub ${ProjectId}-ReadinessCheck-ASG
       ResourceSetName: !Ref ResourceSetASG
 
+# the DynamoDB table
   ReadinessCheckDynamoDB:
     Type: AWS::Route53RecoveryReadiness::ReadinessCheck
     Properties:
