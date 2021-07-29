@@ -4,11 +4,11 @@ Here are three sample templates to configure [Amazon Route 53 Application Recove
 
 The three templates are specific to [the TicTacToe dmeo application](https://github.com/sebsto/tictactoe-dynamodb) deployed with [a CDK script also available in this repository](https://github.com/sebsto/tictactoe-cdk).
 
-- The [first template configures readiness check](https://github.com/sebsto/tictactoe-cdk/blob/main/cloudformation/Route53-ARC-readiness-check.yaml)
-- The second template configures routing controller and health checks
-- The third template creates Route53 DNS failover records, based on the health checks.
+- The [first template configures readiness check](#readiness-check-template)
+- The [second template configures routing controller and health checks](#routing-control-template)
+- The [third template creates Route53 DNS failover records](#dns-records-template), based on the health checks.
 
-The DNS cloudformation template depends on the Routing Controller one.  Readiness Check and Routing Controller are independant of each other.  This means it is required to create stack 1 (readiness check) and 2 (routing controller) first, then template 3 (DNS records)
+The DNS cloudformation template depends on the Routing Controller one.  Readiness Check and Routing Controller templates are independant of each other.  This means it is required to create stack 1 (readiness check) and 2 (routing controller) first, then template 3 (DNS records)
 
 ## Pre-requisites
 
@@ -49,7 +49,7 @@ To help to consume these values and to feed them as input, [I provide a shell sc
 ### Resources 
 
 This template creates the following resources:
-- Two Cells, one in each Region 
+- Two Cells, one in each AWS Region 
 - One Recovery Group for the whole application 
 - Three Resource Sets (Load Balancer, Auto Scaling group, and DynamoDB Table)
 - Three readiness checks, one for each resource set
@@ -80,7 +80,7 @@ aws --region $REGION cloudformation create-stack                                
                  ParameterKey=DynamoDBTable,ParameterValue=$DYNAMODB_TABLE_ARN          \
 ```
 
-### Routing Control template
+## Routing Control template
 
 The routing Control template creates the Application Recovery Controller cluster and the required routing control infrastructure.
 
@@ -132,7 +132,7 @@ After the Routing Control template is deployed, the DNS records template can be 
 This templates relies on the following parameters:
 
 - the TicTacToe demo application load balancer DNS names and Hosted Zone Ids. These are provided as output by [the application CDK script](https://github.com/sebsto/tictactoe-cdk) in the file `out.json`
-- The healt check ids created when deploying the Routing Control template. These are provided as output of the cloudformation stack.
+- The healt check ids created when deploying the Routing Control template. These are provided as output of the Routing Control cloudformation stack.
 - a Route53 hosted zone Id, this is the domain name where you want to create teh DNS records. For this demo, I hard-coded my DNS domain `seb.go-aws.com`
 
 To help to consume these values and to feed them as input, [I provide a shell script](https://github.com/sebsto/tictactoe-cdk/blob/main/cloudformation/Route53-create-dns-records.sh) that reads `out.json` and feed appropriate values to the cloud formation template.
