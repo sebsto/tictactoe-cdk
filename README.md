@@ -13,6 +13,7 @@ The application stack is created both in `us-east-1` and `us-west-2` regions.
 The very first time, be sure to run 
 
 ```zsh 
+npm install
 cdk bootstrap
 ```
 

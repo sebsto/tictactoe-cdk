@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
-import * as cdk from 'aws-cdk-lib';
+import cdk = require('@aws-cdk/core');
 import { TictactoeAppCdkStack } from '../lib/tictactoe-app-cdk-stack';
 import { TictactoeDatabaseCdkStack } from '../lib/tictactoe-database-cdk-stack';
 
