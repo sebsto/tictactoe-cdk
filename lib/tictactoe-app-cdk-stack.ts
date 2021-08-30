@@ -162,6 +162,7 @@ export class TictactoeAppCdkStack extends cdk.Stack {
 
     // output for user to track alarm
     new cdk.CfnOutput(this, "CanaryAlarmName", { value: canary_alarm.alarmName })
+    new cdk.CfnOutput(this, "CanaryAlarmARN", { value: canary_alarm.alarmArn})
     new cdk.CfnOutput(this, "CanaryID", { value: canary.canaryId })
 
     // output the Load Balancer DNS Name for easy retrieval

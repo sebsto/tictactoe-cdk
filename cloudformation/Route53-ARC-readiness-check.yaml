@@ -34,6 +34,14 @@ Parameters:
     Description: The ARN of the Auto Scaling Group in cell 2
     Type: String 
 
+  Canary1: 
+    Description: The ARN of the canary alarm in cell 1
+    Type: String 
+
+  Canary2: 
+    Description: The ARN of the canary alarm in cell 2
+    Type: String 
+
   DynamoDBTable:
     Description: The ARN of the DynamoDB Global Table
     Type: String 
@@ -120,6 +128,21 @@ Resources:
         
         ResourceSetType: AWS::DynamoDB::Table
 
+# the canary alarm
+  ResourceSetCanary:
+    Type: AWS::Route53RecoveryReadiness::ResourceSet
+    Properties:
+        ResourceSetName: !Sub ${ProjectId}-ResourceSet-Canary
+        Resources: 
+          - ResourceArn: !Ref Canary1
+            ReadinessScopes:
+              - !GetAtt Cell1.CellArn        
+          - ResourceArn: !Ref Canary2
+            ReadinessScopes:
+              - !GetAtt Cell2.CellArn        
+        
+        ResourceSetType:  AWS::CloudWatch::Alarm
+
 #
 # The Application Recovery Controller readiness checks
 #
@@ -145,4 +168,12 @@ Resources:
       ReadinessCheckName: !Sub ${ProjectId}-ReadinessCheck-DynamoDB
       ResourceSetName: !Ref ResourceSetDynamoDB
 
+# the canaries
+  ReadinessCheckCanary:
+    Type: AWS::Route53RecoveryReadiness::ReadinessCheck
+    Properties:
+      ReadinessCheckName: !Sub ${ProjectId}-ReadinessCheck-Canary
+      ResourceSetName: !Ref ResourceSetCanary
+
+  
   
