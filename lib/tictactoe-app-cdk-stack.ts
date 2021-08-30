@@ -2,6 +2,7 @@ import cdk = require('@aws-cdk/core');
 import dynamodb = require('@aws-cdk/aws-dynamodb');
 import ec2 = require('@aws-cdk/aws-ec2');
 import autoscaling = require('@aws-cdk/aws-autoscaling');
+import cloudwatch = require('@aws-cdk/aws-cloudwatch');
 import elbv2 = require('@aws-cdk/aws-elasticloadbalancingv2');
 import iam = require('@aws-cdk/aws-iam');
 import synthetics = require('@aws-cdk/aws-synthetics');
@@ -149,9 +150,8 @@ export class TictactoeAppCdkStack extends cdk.Stack {
           ENDPOINT: lb.loadBalancerDnsName
       },
     });
-    /*
     const canarySuccessPercent = canary.metricSuccessPercent({
-      period: Duration.minutes(5),
+      period: cdk.Duration.minutes(5),
     });
     const canary_alarm = new cloudwatch.Alarm(this, 'TicTacToeCanaryAlarm', {
       metric: canarySuccessPercent,
@@ -161,9 +161,8 @@ export class TictactoeAppCdkStack extends cdk.Stack {
     });
 
     // output for user to track alarm
-    new CfnOutput(this, "CanaryAlarmName", { value: canary_alarm.alarmName })
-    new CfnOutput(this, "CanaryID", { value: canary.canaryId })
-    */
+    new cdk.CfnOutput(this, "CanaryAlarmName", { value: canary_alarm.alarmName })
+    new cdk.CfnOutput(this, "CanaryID", { value: canary.canaryId })
 
     // output the Load Balancer DNS Name for easy retrieval
     new cdk.CfnOutput(this, 'LoadBalancerDNSName', { value: lb.loadBalancerDnsName });
