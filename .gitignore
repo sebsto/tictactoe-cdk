@@ -9,3 +9,5 @@ lib/canary/nodejs/package-lock.json
 .cdk.staging
 cdk.out
 out.json
+
+*.code-workspace
