@@ -48,8 +48,10 @@ export class TictactoeAppCdkStack extends cdk.Stack {
     const dynamoDBRole = new iam.Role(this, 'TicTacToeRole', {
       assumedBy: new iam.ServicePrincipal('ec2.amazonaws.com')
     });
-    // allow the role to read / write on the table
-    props?.table.grantFullAccess(dynamoDBRole);
+    let dynamo_describe: string = 'dynamodb:DescribeTable';
+    // allow the role to read / write on the table, and also describe table
+    props?.table.grantReadWriteData(dynamoDBRole);
+    props?.table.grant(dynamoDBRole, dynamo_describe);
 
     //
     // define a user data script to install & launch a web server on the application instance
