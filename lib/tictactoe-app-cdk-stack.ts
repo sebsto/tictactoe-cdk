@@ -56,13 +56,13 @@ export class TictactoeAppCdkStack extends Stack {
     //
     const installAppUserdata = ec2.UserData.forLinux();
     installAppUserdata.addCommands(
-      'yum install git -y',
-      'git clone https://github.com/sebsto/tictactoe-dynamodb',
-
       'curl -O https://bootstrap.pypa.io/get-pip.py',
       'python3 get-pip.py',
 
-      'cd tictactoe-dynamodb/',
+      'aws s3api get-object --bucket r53-recovery-controller-demo-app-iad --key tictactoe-app.zip ./tictactoe-app.zip',
+      'mkdir tictactoe-app && cd tictactoe-app',
+
+      'unzip ../tictactoe-app.zip',
       '/usr/local/bin/pip install -r requirements.txt',
 
       'USE_EC2_INSTANCE_METADATA=true python3 application.py --serverPort 8080'
@@ -95,7 +95,7 @@ export class TictactoeAppCdkStack extends Stack {
 
     // Create an IAM permission to allow the instances to connect to SSM 
     // just in case I need to debug the user data script  
-    const policy = {
+    const policySSM = {
       Action: [
         "ssmmessages:*",
         "ssm:UpdateInstanceInformation",
@@ -105,8 +105,19 @@ export class TictactoeAppCdkStack extends Stack {
       Effect: "Allow"
     }
 
-    asg.addToRolePolicy(iam.PolicyStatement.fromJson(policy));
+    asg.addToRolePolicy(iam.PolicyStatement.fromJson(policySSM));
  
+    // Create an S3 policy, somehow this is required, even when reading public objects from S3  
+    // the bootstrap user-data script uses S3 to download the app
+    const policyS3 = {
+      Action: [
+        "s3:GetObject"
+      ],
+      Resource: "*",
+      Effect: "Allow"
+    }
+
+    asg.addToRolePolicy(iam.PolicyStatement.fromJson(policyS3));
 
     /********************************************
      * Create the load balancer
