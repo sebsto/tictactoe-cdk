@@ -11,5 +11,5 @@ fi
 REGION=us-west-2
 STACK_NAME=Route53ARC-RoutingControl
 aws --region $REGION cloudformation create-stack               \
-    --template-body file://./Route53-ARC-routing-control.yaml  \
+    --template-body file://../cloudformation/Route53-ARC-routing-control.yaml  \
     --stack-name $STACK_NAME                                   \

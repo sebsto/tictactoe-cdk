@@ -1,10 +1,13 @@
 #!/bin/zsh
 
+############################################
 #
 # TO MODIFY WITH YOUR DNS DOMAIN AND ZONE ID
 #
 DNS_HOSTED_ZONE_NAME=seb.go-aws.com
 DNS_HOSTED_ZONE_ID=Z00818992JHDRS98KL6A9
+
+#############################################
 
 CDK_OUTPUT_FILE=../out.json 
 
@@ -33,7 +36,7 @@ ROUTE53_HEALTHCHECKID_CELL1=$(aws --region $REGION cloudformation describe-stack
 ROUTE53_HEALTHCHECKID_CELL2=$(aws --region $REGION cloudformation describe-stacks --stack-name Route53ARC-RoutingControl --query "Stacks[].Outputs[?OutputKey=='HealthCheckIdWest'].OutputValue" --output text)
 
 aws --region $REGION cloudformation create-stack               \
-    --template-body file://./Route53-DNS-records.yaml          \
+    --template-body file://../cloudformation/Route53-DNS-records.yaml          \
     --stack-name $STACK_NAME                                   \
     --parameters ParameterKey=LoadBalancerDNSNameEast,ParameterValue=$LOAD_BALANCER_1_DNS \
                  ParameterKey=LoadBalancerDNSNameWest,ParameterValue=$LOAD_BALANCER_2_DNS \

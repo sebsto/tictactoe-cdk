@@ -59,7 +59,7 @@ export class TictactoeAppCdkStack extends Stack {
       'curl -O https://bootstrap.pypa.io/get-pip.py',
       'python3 get-pip.py',
 
-      'aws s3api get-object --bucket r53-recovery-controller-demo-app-iad --key tictactoe-app.zip ./tictactoe-app.zip',
+      'wget http://r53-recovery-controller-demo-app-iad.s3-website-us-east-1.amazonaws.com/tictactoe-app.zip',
       'mkdir tictactoe-app && cd tictactoe-app',
 
       'unzip ../tictactoe-app.zip',
@@ -106,18 +106,6 @@ export class TictactoeAppCdkStack extends Stack {
     }
 
     asg.addToRolePolicy(iam.PolicyStatement.fromJson(policySSM));
- 
-    // Create an S3 policy, somehow this is required, even when reading public objects from S3  
-    // the bootstrap user-data script uses S3 to download the app
-    const policyS3 = {
-      Action: [
-        "s3:GetObject"
-      ],
-      Resource: "*",
-      Effect: "Allow"
-    }
-
-    asg.addToRolePolicy(iam.PolicyStatement.fromJson(policyS3));
 
     /********************************************
      * Create the load balancer

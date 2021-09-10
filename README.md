@@ -1,75 +1,106 @@
-# Amazon Route 53 Application Recovery Controller Cloudformation templates
+# CloudFormation templates for Amazon Route 53 Application Recovery Controller (ARC)
 
-Here are three sample templates to configure [Amazon Route 53 Application Recovery Controller](https://docs.aws.amazon.com/r53recovery/latest/dg/what-is-route53-recovery.html) automatically from CloudFormation.
+## Overview
+These three sample CloudFormation templates show you how to configure [Amazon Route 53 Application Recovery Controller](https://docs.aws.amazon.com/r53recovery/latest/dg/what-is-route53-recovery.html) automatically. 
 
-The three templates are specific to [the TicTacToe dmeo application](https://github.com/sebsto/tictactoe-dynamodb) deployed with [a CDK script also available in this repository](https://github.com/sebsto/tictactoe-cdk).
+The three templates are specific to [the TicTacToe demo application](http://r53-recovery-controller-demo-app-iad.s3-website-us-east-1.amazonaws.com/tictactoe-app.zip) deployed with [a CDK script](http://r53-application-recovery-controller-cfn-app-iad.s3-website-us-east-1.amazonaws.com/tictactoe-infra-cdk-arc-cfn-templates.zip). For more information about AWS Cloud Development Kit, go to the [AWS CDK documentation](https://aws.amazon.com/cdk/).
 
-- The [first template configures readiness check](#readiness-check-template)
-- The [second template configures routing controller and health checks](#routing-control-template)
-- The [third template creates Route53 DNS failover records](#dns-records-template), based on the health checks.
+- The [first template configures readiness checks](#readiness-check-template). Readiness checks ensure that your recovery environment is scaled and configured to take over when needed.
+- The [second template configures routing controls and health checks](#routing-control-template). You use routing controls to rebalance traffic across application replicas during failures.
+- The [third template creates Route 53 DNS failover records](#dns-failover-records-template). DNS failover records on health checks enable you to reroute traffic by using routing controls. (This template must be run after the first two.)
 
-The DNS cloudformation template depends on the Routing Controller one.  Readiness Check and Routing Controller templates are independant of each other.  This means it is required to create stack 1 (readiness check) and 2 (routing controller) first, then template 3 (DNS records)
+## Prerequisites
 
-## Pre-requisites
+Before you deploy the CloudFormation templates, download and deploy the TicTacToe demo application by using the supplied CDK application.
 
-Before deploying these templates, deploy the TicTacToe demo application using [the supplied CDK script](https://github.com/sebsto/tictactoe-cdk).
+The three CloudFormation templates are located in the `cloudformation` folder of the project.
+
+_Please make sure to install AWS CDK v2. The CDK scripts won't work with AWS CDK v1._
 
 ```zsh 
-# Install CDK 2 if not done already 
+# Install CDK 2, if you haven't already done so 
 npm install -g aws-cdk@next
 
-# Clone this repository if not done already 
-git clone https://github.com/sebsto/tictactoe-cdk.git
+# Download the CDK script that allows to deploy the app
+wget http://r53-application-recovery-controller-cfn-app-iad.s3-website-us-east-1.amazonaws.com/tictactoe-infra-cdk-arc-cfn-templates.zip
+unzip tictactoe-infra-cdk-arc-cfn-templates.zip
 cd tictactoe-cdk
 
-# the very first time (one time operation)
-cdk bootstrap 
+pushd app
+
+# first time only (one time operation)
+npm install && cdk bootstrap 
 
 # deploy the app 
-cdk deploy --all --outputs-file out.json
+cdk deploy --all --outputs-file ../out.json
+
+popd
 ```
+The application deployment takes ~10 minutes to complete. The database stack creation might take up to 10 minutes. You will be prompted 3 times for confirmation (y/n?), always answer `y`. Three CloudFormation stacks are created :
 
-## Readiness Check template
+- `TictactoeAppCdkStack-us-east-1` : the application stack deployed in `us-east-1`region
+- `TictactoeAppCdkStack-us-west-2` : the application stack deployed in `us-west-2`region
+- `TictactoeDatabaseCdkStack` : the database stack, deployed in `us-west-2`and shared by the two application stacks.
 
-The readiness check template is specific to [the TicTacToe application](https://github.com/sebsto/tictactoe-dynamodb) deployed with [a CDK script also available in this repository](https://github.com/sebsto/tictactoe-cdk).
+Now that the application is deployed, you are ready to depploy the Route 53 Application Recovery Controler (ARC) CloudFormation templates.
 
-The TicaTacToe CDK deployment script generates a file (`out.json`) that contains the ARN of resources having been created : Load Balancers, Auto Scaling Groups, and DynamoDB Table.
+## CloudFormation input variables
+
+The CloudFormation templates expect the following parameters:
+
+* **AWS Regions**: Regions where the TicTacToe AWS resources are deployed: `us-east-1` and `us-west-2` 
+* **DNS hosted zone**: Update line 7 of the 'scripts/Route53-create-dns-records.sh' script with a value that corresponds to your AWS environment
+* **DNS domain name**: Update line 6 of the 'scripts/Route53-create-dns-records.sh' script with a value that corresponds to your AWS environment
+
+If you don't have your own DNS domain hosted on Route53, you can still deploy the HealthCheck and Routing Control templates, but not the DNS failover healthcheck records template.
+
+## Readiness check template
+
+The CloudFormation readiness check template is specific to [the TicTacToe demo application](http://r53-recovery-controller-demo-app-iad.s3-website-us-east-1.amazonaws.com/tictactoe-app.zip) deployed with [a CDK script](http://r53-application-recovery-controller-cfn-app-iad.s3-website-us-east-1.amazonaws.com/tictactoe-infra-cdk-arc-cfn-templates.zip).
+
+The TicTacToe CDK deployment script generates a file (`out.json`) that contains the ARNs of resources that are required as input parameters for the template.
 
 ### Parameters
 
-This templates relies on the following parameters:
+This template takes the following parameters:
 
 - The AWS Regions where the resources are located 
-- The demo application Load Balancers ARNs
-- The demo application Auto Scaling Group ARNs
-- The demo application DynamoDB Table ARN
+- The demo application load balancers ARNs
+- The demo application Auto Scaling group ARNs
+- The demo application DynamoDB table ARN
 
-To help to consume these values and to feed them as input, [I provide a shell script](https://github.com/sebsto/tictactoe-cdk/blob/main/cloudformation/Route53-create-readiness-check.sh) that reads `out.json`and feed appropriate values to the cloud formation template.
+To read the parameters and provide them as input to the template, I provide a shell script `scripts/Route53-create-readiness-check.sh`. It reads `out.json` and provides the appropriate values to the CloudFormation readiness check template.
+
+The script deploys the stack in `us-west-2`region by default. You can change this by editing line 19 (`REGION=us-west-2`)
 
 ### Resources 
 
 This template creates the following resources:
-- Two Cells, one in each AWS Region 
-- One Recovery Group for the whole application 
-- Three Resource Sets (Load Balancer, Auto Scaling group, and DynamoDB Table)
-- Three readiness checks, one for each resource set
+
+- 2 cells, one for each AWS Region 
+- 1 recovery group, for the whole application 
+- 3 resource sets, one each for the load balancers, Auto Scaling groups, and DynamoDB table
+- 3 readiness checks, one for each resource set
 
 ### Deployment
 
-To deploy the readiness check template, open a terminal and type:
+To deploy the readiness check template, open a terminal and type the following:
 
 ```zsh
 # assuming you're in the main directory of this project
-cd cloudformation
+cd scripts
 
 ./Route53-create-readiness-check.sh
 ```
 
-Alternatively, if you want to invoke Cloudformation using the AWS CLI, you can issue a command similar to 
+Alternatively, to invoke CloudFormation by using the AWS CLI, issue a command similar to the following: 
 
 ```zsh 
+REGION=us-west-2
+STACK_NAME=Route53ARC-ReadinessCheck
+
 aws --region $REGION cloudformation create-stack                                        \
-    --template-body file://./Route53-ARC-readiness-check.yaml                           \
+    --template-body file://./cloudformation/Route53-ARC-readiness-check.yaml                           \
     --stack-name $STACK_NAME                                                            \
     --parameters ParameterKey=Region1,ParameterValue=us-east-1                          \
                  ParameterKey=Region2,ParameterValue=us-west-2                          \
@@ -80,95 +111,100 @@ aws --region $REGION cloudformation create-stack                                
                  ParameterKey=DynamoDBTable,ParameterValue=$DYNAMODB_TABLE_ARN          \
 ```
 
-## Routing Control template
+## Routing control template
 
-The routing Control template creates the Application Recovery Controller cluster and the required routing control infrastructure.
+The CloudFormation routing Control template creates the cluster in Application Recovery Controller and other required routing control infrastructure.
 
 ### Parameters 
 
-This template accepts the following parameters
+This template takes the following parameters:
 
-- The two AWS Regions to create the Cells
+- The two AWS Regions for the application cells
 
 ### Resources
 
-The Routing Control templates creates the following resources :
+The template creates the following resources:
 
-- an Application Recovery Controller cluster,
-- an Application Recovery Controller control panel,
-- two Application Recovery Controller cells in `us-east-1`and `us-west-1`,
-- two Application Recovery Controller health checks,
-- one Safety Rule to ensure at least one cell is active at all time.
+- 1 cluster
+- 1 control panel
+- 2 routing controls in `us-east-1`and `us-west-1`
+- 1 safety rule, to ensure that at least one cell is active at all times
+- 2 Route 53 routing control health checks
 
-For terminology, refer to [the Amazon Route 53 Application Recovery Controller documentation](https://docs.aws.amazon.com/r53recovery/latest/dg/introduction-components.html).
+To learn about these resources and how they work, see [the Amazon Route 53 Application Recovery Controller documentation](https://docs.aws.amazon.com/r53recovery/latest/dg/introduction-components.html).
 
-It is independant of the readiness check template described earlier, you can deploy the two stacks in parallel.
+The routing control template is independent of the readiness check template described earlier, so you can deploy the two stacks in parallel if you like.
 
 ### Deployment
 
-To deploy the Routing Control template, open a terminal and type:
+To deploy the routing control template, open a terminal and type the following:
 
 ```zsh
 # assuming you're in the main directory of this project
-cd cloudformation
+cd scripts
 
 ./Route53-create-routing-control.sh
 ```
 
-Alternatively, if you want to invoke Cloudformation using the AWS CLI, you can issue a command similar to
+Alternatively, if you want to invoke CloudFormation by using the AWS CLI, you can issue a command similar to the following:
 
 ```zsh
+REGION=us-west-2
+STACK_NAME=Route53ARC-RoutingControl
+
 aws --region $REGION cloudformation create-stack               \
     --template-body file://./Route53-ARC-routing-control.yaml  \
     --stack-name $STACK_NAME
 ```
 
-## DNS Records template 
+## DNS failover records template 
 
-After the Routing Control template is deployed, the DNS records template can be used to configure Route 53 DNS records.
+You can use the DNS records template to configure the following required Route 53 DNS failover records for the routing control health checks:
+
+- An A ALIAS **PRIMARY** failover record: Points to the TicTacToe demo application load balancer deployed in `us-east-1`
+- An A ALIAS **SECONDARY** failover record: Points to the TicTacToe demo application load balancer deployed in `us-west-2`
+
+After you deplopy the template, the DNS records are associated with the corresponding routing control health checks that were created earlier. The failover records enable you to use the routing controls to failover traffic in Application Recovery Controller.
 
 ### Parameters 
 
-This templates relies on the following parameters:
+This template uses the following parameters:
 
-- the TicTacToe demo application load balancer DNS names and Hosted Zone Ids. These are provided as output by [the application CDK script](https://github.com/sebsto/tictactoe-cdk) in the file `out.json`
-- The healt check ids created when deploying the Routing Control template. These are provided as output of the Routing Control cloudformation stack.
-- a Route53 hosted zone Id, this is the domain name where you want to create teh DNS records. For this demo, I hard-coded my DNS domain `seb.go-aws.com`
+- The TicTacToe demo application load balancer DNS names and Hosted Zone Ids. These are provided as output by the application CDK script that you run earlier, in the file `out.json`.
+- The health check ids tnat are created when you deploy the routing control template. The routing control CloudFormation stack returns these values as output.
+- A Route 53 hosted zone ID. This is the domain name where you want to create the DNS records. For this demo, I hardcoded my DNS domain, `seb.go-aws.com` in the shell script, but you must use your own domain.
 
-To help to consume these values and to feed them as input, [I provide a shell script](https://github.com/sebsto/tictactoe-cdk/blob/main/cloudformation/Route53-create-dns-records.sh) that reads `out.json` and feed appropriate values to the cloud formation template.
+To read the parameters and provide them as input to the template, I provide a shell script `scripts/Route53-create-dns-records.sh`. It reads `out.json` and provides the appropriate values to the CloudFormation readiness check template.
 
 **WARNING**  
-> **IT IS MANDATORY TO ADJUST THE DNS DOMAIN NAME AND DNS ZONE ID BEFORE TO DEPLOY THIS TEMPLATE**
+> **YOU MUST CHANGE THE DNS DOMAIN NAME AND DNS HOSTED ZONE ID BEFORE YOU DEPLOY THIS TEMPLATE**
 >
-> The two values on [line 6](https://github.com/sebsto/tictactoe-cdk/blob/main/cloudformation/Route53-create-dns-records.sh#L6) and [line 7](https://github.com/sebsto/tictactoe-cdk/blob/main/cloudformation/Route53-create-dns-records.sh#L7) have to be modified to fit your environment.
-
-### Resources
-
-This template creates the following resources:
-
-- a A ALIAS **PRIMARY** failover record pointing to the TicTacToe demo application load balancer deployed in `us-east-1`
-- a A ALIAS **SECONDARY** failover record pointing to the TicTacToe demo application load balancer deployed in `us-west-2`
-
-Both records are associated with the corresponding health check created by the Routing Control template.
-
-**To use this template, you need to have a Hosted Zone on Route 53.**
+> As noted at the top of this README, update the following values to fit your environment:
+>* **DNS hosted zone**: Update line 7 of the `scripts/Route53-create-dns-records.sh` script with a value that corresponds to your AWS environment
+>* **DNS domain name**: Update line 6 of the `scripts/Route53-create-dns-records.sh` script with a value that corresponds to your AWS environment
 
 ### Deployment
 
-To deploy the Routing Control template, open a terminal and type:
+To deploy the Routing Control template, open a terminal and type the following:
 
 ```zsh
 # assuming you're in the main directory of this project
-cd cloudformation
+cd scripts
 
 ./Route53-create-dns-records.sh
 ```
 
-Alternatively, if you want to invoke Cloudformation using the AWS CLI, you can issue a command similar to
+Alternatively, if you want to invoke CloudFormation using the AWS CLI, you can issue a command similar to the following:
 
 ```
-aws --region $REGION cloudformation create-stack                                                       \
-    --template-body file://./Route53-DNS-records.yaml                                                  \
+REGION=us-west-2
+STACK_NAME=Route53-dns-records
+
+ROUTE53_HEALTHCHECKID_CELL1=$(aws --region $REGION cloudformation describe-stacks --stack-name Route53ARC-RoutingControl --query "Stacks[].Outputs[?OutputKey=='HealthCheckIdEast'].OutputValue" --output text)
+ROUTE53_HEALTHCHECKID_CELL2=$(aws --region $REGION cloudformation describe-stacks --stack-name Route53ARC-RoutingControl --query "Stacks[].Outputs[?OutputKey=='HealthCheckIdWest'].OutputValue" --output text)
+
+aws --region $REGION CloudFormation create-stack                                                       \
+    --template-body file://./cloudformation/Route53-DNS-records.yaml                                                  \
     --stack-name $STACK_NAME                                                                           \
     --parameters ParameterKey=LoadBalancerDNSNameEast,ParameterValue=$LOAD_BALANCER_1_DNS              \
                  ParameterKey=LoadBalancerDNSNameWest,ParameterValue=$LOAD_BALANCER_2_DNS              \
@@ -179,6 +215,6 @@ aws --region $REGION cloudformation create-stack                                
                  ParameterKey=DNSHealthcheckIdEast,ParameterValue=$ROUTE53_HEALTHCHECKID_CELL1         \
                  ParameterKey=DNSHealthcheckIdWest,ParameterValue=$ROUTE53_HEALTHCHECKID_CELL2 
 ```
-## Question or Feedback ?
+## Question or feedback?
 
 Send your questions or feedback to stormacq@amazon.com

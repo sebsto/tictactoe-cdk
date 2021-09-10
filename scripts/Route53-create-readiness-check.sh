@@ -24,7 +24,7 @@ AUTO_SCALINGGROUP_1_ARN=$(cat $CDK_OUTPUT_FILE | jq .\"TictactoeAppCdkStack-us-e
 AUTO_SCALINGGROUP_2_ARN=$(cat $CDK_OUTPUT_FILE | jq .\"TictactoeAppCdkStack-us-west-2\".ARNAutoScalingGroup -r)
 DYNAMODB_TABLE_ARN=$(cat $CDK_OUTPUT_FILE | jq .TictactoeDatabaseCdkStack.ARNDatabaseTable -r)
 aws --region $REGION cloudformation create-stack               \
-    --template-body file://./Route53-ARC-readiness-check.yaml  \
+    --template-body file://../cloudformation/Route53-ARC-readiness-check.yaml  \
     --stack-name $STACK_NAME                                   \
     --parameters ParameterKey=Region1,ParameterValue=us-east-1 \
                  ParameterKey=Region2,ParameterValue=us-west-2 \

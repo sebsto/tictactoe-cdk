@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="css/github-style.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="cloudformation-templates-for-amazon-route-53-application-recovery-controller-arc">CloudFormation templates for Amazon Route 53 Application Recovery Controller (ARC)</h1>
+<h2 id="overview">Overview</h2>
+<p>These three sample CloudFormation templates show you how to configure <a href="https://docs.aws.amazon.com/r53recovery/latest/dg/what-is-route53-recovery.html">Amazon Route 53 Application Recovery Controller</a> automatically.</p>
+<p>The three templates are specific to <a href="http://r53-recovery-controller-demo-app-iad.s3-website-us-east-1.amazonaws.com/tictactoe-app.zip">the TicTacToe demo application</a> deployed with <a href="http://r53-application-recovery-controller-cfn-app-iad.s3-website-us-east-1.amazonaws.com/tictactoe-infra-cdk-arc-cfn-templates.zip">a CDK script</a>. For more information about AWS Cloud Development Kit, go to the <a href="https://aws.amazon.com/cdk/">AWS CDK documentation</a>.</p>
+<ul>
+<li>The <a href="#readiness-check-template">first template configures readiness checks</a>. Readiness checks ensure that your recovery environment is scaled and configured to take over when needed.</li>
+<li>The <a href="#routing-control-template">second template configures routing controls and health checks</a>. You use routing controls to rebalance traffic across application replicas during failures.</li>
+<li>The <a href="#dns-failover-records-template">third template creates Route 53 DNS failover records</a>. DNS failover records on health checks enable you to reroute traffic by using routing controls. (This template must be run after the first two.)</li>
+</ul>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before you deploy the CloudFormation templates, download and deploy the TicTacToe demo application by using the supplied CDK application.</p>
+<p>The three CloudFormation templates are located in the <code>cloudformation</code> folder of the project.</p>
+<p><em>Please make sure to install AWS CDK v2. The CDK scripts won't work with AWS CDK v1.</em></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode zsh"><code class="sourceCode zsh"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install CDK 2, if you haven&#39;t already done so </span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="at">-g</span> aws-cdk@next</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Download the CDK script that allows to deploy the app</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">wget</span> http://r53-application-recovery-controller-cfn-app-iad.s3-website-us-east-1.amazonaws.com/tictactoe-infra-cdk-arc-cfn-templates.zip</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">unzip</span> tictactoe-infra-cdk-arc-cfn-templates.zip</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> tictactoe-cdk</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="bu">pushd</span> app</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># first time only (one time operation)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="kw">&amp;&amp;</span> <span class="ex">cdk</span> bootstrap </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># deploy the app </span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="ex">cdk</span> deploy <span class="at">--all</span> <span class="at">--outputs-file</span> ../out.json</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="bu">popd</span></span></code></pre></div>
+<p>The application deployment takes ~10 minutes to complete. The database stack creation might take up to 10 minutes. You will be prompted 3 times for confirmation (y/n?), always answer <code>y</code>. Three CloudFormation stacks are created :</p>
+<ul>
+<li><code>TictactoeAppCdkStack-us-east-1</code> : the application stack deployed in <code>us-east-1</code>region</li>
+<li><code>TictactoeAppCdkStack-us-west-2</code> : the application stack deployed in <code>us-west-2</code>region</li>
+<li><code>TictactoeDatabaseCdkStack</code> : the database stack, deployed in <code>us-west-2</code>and shared by the two application stacks.</li>
+</ul>
+<p>Now that the application is deployed, you are ready to depploy the Route 53 Application Recovery Controler (ARC) CloudFormation templates.</p>
+<h2 id="cloudformation-input-variables">CloudFormation input variables</h2>
+<p>The CloudFormation templates expect the following parameters:</p>
+<ul>
+<li><strong>AWS Regions</strong>: Regions where the TicTacToe AWS resources are deployed: <code>us-east-1</code> and <code>us-west-2</code></li>
+<li><strong>DNS hosted zone</strong>: Update line 7 of the 'scripts/Route53-create-dns-records.sh' script with a value that corresponds to your AWS environment</li>
+<li><strong>DNS domain name</strong>: Update line 6 of the 'scripts/Route53-create-dns-records.sh' script with a value that corresponds to your AWS environment</li>
+</ul>
+<p>If you don't have your own DNS domain hosted on Route53, you can still deploy the HealthCheck and Routing Control templates, but not the DNS failover healthcheck records template.</p>
+<h2 id="readiness-check-template">Readiness check template</h2>
+<p>The CloudFormation readiness check template is specific to <a href="http://r53-recovery-controller-demo-app-iad.s3-website-us-east-1.amazonaws.com/tictactoe-app.zip">the TicTacToe demo application</a> deployed with <a href="http://r53-application-recovery-controller-cfn-app-iad.s3-website-us-east-1.amazonaws.com/tictactoe-infra-cdk-arc-cfn-templates.zip">a CDK script</a>.</p>
+<p>The TicTacToe CDK deployment script generates a file (<code>out.json</code>) that contains the ARNs of resources that are required as input parameters for the template.</p>
+<h3 id="parameters">Parameters</h3>
+<p>This template takes the following parameters:</p>
+<ul>
+<li>The AWS Regions where the resources are located</li>
+<li>The demo application load balancers ARNs</li>
+<li>The demo application Auto Scaling group ARNs</li>
+<li>The demo application DynamoDB table ARN</li>
+</ul>
+<p>To read the parameters and provide them as input to the template, I provide a shell script <code>scripts/Route53-create-readiness-check.sh</code>. It reads <code>out.json</code> and provides the appropriate values to the CloudFormation readiness check template.</p>
+<p>The script deploys the stack in <code>us-west-2</code>region by default. You can change this by editing line 19 (<code>REGION=us-west-2</code>)</p>
+<h3 id="resources">Resources</h3>
+<p>This template creates the following resources:</p>
+<ul>
+<li>2 cells, one for each AWS Region</li>
+<li>1 recovery group, for the whole application</li>
+<li>3 resource sets, one each for the load balancers, Auto Scaling groups, and DynamoDB table</li>
+<li>3 readiness checks, one for each resource set</li>
+</ul>
+<h3 id="deployment">Deployment</h3>
+<p>To deploy the readiness check template, open a terminal and type the following:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode zsh"><code class="sourceCode zsh"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># assuming you&#39;re in the main directory of this project</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> scripts</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./Route53-create-readiness-check.sh</span></span></code></pre></div>
+<p>Alternatively, to invoke CloudFormation by using the AWS CLI, issue a command similar to the following:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode zsh"><code class="sourceCode zsh"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">REGION</span><span class="op">=</span>us-west-2</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="va">STACK_NAME</span><span class="op">=</span>Route53ARC-ReadinessCheck</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> <span class="at">--region</span> <span class="va">$REGION</span> cloudformation create-stack                                        <span class="dt">\</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">--template-body</span> file://./cloudformation/Route53-ARC-readiness-check.yaml                           <span class="dt">\</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">--stack-name</span> <span class="va">$STACK_NAME</span>                                                            <span class="dt">\</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">--parameters</span> ParameterKey=Region1,ParameterValue=us-east-1                          <span class="dt">\</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                 ParameterKey=Region2,ParameterValue=us-west-2                          <span class="dt">\</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                 ParameterKey=LoadBalancer1,ParameterValue=<span class="va">$LOAD_BALANCER_1_ARN</span>         <span class="dt">\</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                 ParameterKey=LoadBalancer2,ParameterValue=<span class="va">$LOAD_BALANCER_2_ARN</span>         <span class="dt">\</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                 ParameterKey=AutoScalingGroup1,ParameterValue=<span class="va">$AUTO_SCALINGGROUP_1_ARN</span> <span class="dt">\</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>                 ParameterKey=AutoScalingGroup2,ParameterValue=<span class="va">$AUTO_SCALINGGROUP_2_ARN</span> <span class="dt">\</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                 ParameterKey=DynamoDBTable,ParameterValue=<span class="va">$DYNAMODB_TABLE_ARN</span>          <span class="dt">\</span></span></code></pre></div>
+<h2 id="routing-control-template">Routing control template</h2>
+<p>The CloudFormation routing Control template creates the cluster in Application Recovery Controller and other required routing control infrastructure.</p>
+<h3 id="parameters-1">Parameters</h3>
+<p>This template takes the following parameters:</p>
+<ul>
+<li>The two AWS Regions for the application cells</li>
+</ul>
+<h3 id="resources-1">Resources</h3>
+<p>The template creates the following resources:</p>
+<ul>
+<li>1 cluster</li>
+<li>1 control panel</li>
+<li>2 routing controls in <code>us-east-1</code>and <code>us-west-1</code></li>
+<li>1 safety rule, to ensure that at least one cell is active at all times</li>
+<li>2 Route 53 routing control health checks</li>
+</ul>
+<p>To learn about these resources and how they work, see <a href="https://docs.aws.amazon.com/r53recovery/latest/dg/introduction-components.html">the Amazon Route 53 Application Recovery Controller documentation</a>.</p>
+<p>The routing control template is independent of the readiness check template described earlier, so you can deploy the two stacks in parallel if you like.</p>
+<h3 id="deployment-1">Deployment</h3>
+<p>To deploy the routing control template, open a terminal and type the following:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode zsh"><code class="sourceCode zsh"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># assuming you&#39;re in the main directory of this project</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> scripts</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./Route53-create-routing-control.sh</span></span></code></pre></div>
+<p>Alternatively, if you want to invoke CloudFormation by using the AWS CLI, you can issue a command similar to the following:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode zsh"><code class="sourceCode zsh"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">REGION</span><span class="op">=</span>us-west-2</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="va">STACK_NAME</span><span class="op">=</span>Route53ARC-RoutingControl</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> <span class="at">--region</span> <span class="va">$REGION</span> cloudformation create-stack               <span class="dt">\</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">--template-body</span> file://./Route53-ARC-routing-control.yaml  <span class="dt">\</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">--stack-name</span> <span class="va">$STACK_NAME</span></span></code></pre></div>
+<h2 id="dns-failover-records-template">DNS failover records template</h2>
+<p>You can use the DNS records template to configure the following required Route 53 DNS failover records for the routing control health checks:</p>
+<ul>
+<li>An A ALIAS <strong>PRIMARY</strong> failover record: Points to the TicTacToe demo application load balancer deployed in <code>us-east-1</code></li>
+<li>An A ALIAS <strong>SECONDARY</strong> failover record: Points to the TicTacToe demo application load balancer deployed in <code>us-west-2</code></li>
+</ul>
+<p>After you deplopy the template, the DNS records are associated with the corresponding routing control health checks that were created earlier. The failover records enable you to use the routing controls to failover traffic in Application Recovery Controller.</p>
+<h3 id="parameters-2">Parameters</h3>
+<p>This template uses the following parameters:</p>
+<ul>
+<li>The TicTacToe demo application load balancer DNS names and Hosted Zone Ids. These are provided as output by the application CDK script that you run earlier, in the file <code>out.json</code>.</li>
+<li>The health check ids tnat are created when you deploy the routing control template. The routing control CloudFormation stack returns these values as output.</li>
+<li>A Route 53 hosted zone ID. This is the domain name where you want to create the DNS records. For this demo, I hardcoded my DNS domain, <code>seb.go-aws.com</code> in the shell script, but you must use your own domain.</li>
+</ul>
+<p>To read the parameters and provide them as input to the template, I provide a shell script <code>scripts/Route53-create-dns-records.sh</code>. It reads <code>out.json</code> and provides the appropriate values to the CloudFormation readiness check template.</p>
+<p><strong>WARNING</strong></p>
+<blockquote>
+<p><strong>YOU MUST CHANGE THE DNS DOMAIN NAME AND DNS HOSTED ZONE ID BEFORE YOU DEPLOY THIS TEMPLATE</strong></p>
+<p>As noted at the top of this README, update the following values to fit your environment:</p>
+<ul>
+<li><strong>DNS hosted zone</strong>: Update line 7 of the <code>scripts/Route53-create-dns-records.sh</code> script with a value that corresponds to your AWS environment</li>
+<li><strong>DNS domain name</strong>: Update line 6 of the <code>scripts/Route53-create-dns-records.sh</code> script with a value that corresponds to your AWS environment</li>
+</ul>
+</blockquote>
+<h3 id="deployment-2">Deployment</h3>
+<p>To deploy the Routing Control template, open a terminal and type the following:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode zsh"><code class="sourceCode zsh"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># assuming you&#39;re in the main directory of this project</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> scripts</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./Route53-create-dns-records.sh</span></span></code></pre></div>
+<p>Alternatively, if you want to invoke CloudFormation using the AWS CLI, you can issue a command similar to the following:</p>
+<pre><code>REGION=us-west-2
+STACK_NAME=Route53-dns-records
+
+ROUTE53_HEALTHCHECKID_CELL1=$(aws --region $REGION cloudformation describe-stacks --stack-name Route53ARC-RoutingControl --query &quot;Stacks[].Outputs[?OutputKey==&#39;HealthCheckIdEast&#39;].OutputValue&quot; --output text)
+ROUTE53_HEALTHCHECKID_CELL2=$(aws --region $REGION cloudformation describe-stacks --stack-name Route53ARC-RoutingControl --query &quot;Stacks[].Outputs[?OutputKey==&#39;HealthCheckIdWest&#39;].OutputValue&quot; --output text)
+
+aws --region $REGION CloudFormation create-stack                                                       \
+    --template-body file://./cloudformation/Route53-DNS-records.yaml                                                  \
+    --stack-name $STACK_NAME                                                                           \
+    --parameters ParameterKey=LoadBalancerDNSNameEast,ParameterValue=$LOAD_BALANCER_1_DNS              \
+                 ParameterKey=LoadBalancerDNSNameWest,ParameterValue=$LOAD_BALANCER_2_DNS              \
+                 ParameterKey=LoadBalancerHostedZoneEast,ParameterValue=$LOAD_BALANCER_HOSTEDZONE_EAST \
+                 ParameterKey=LoadBalancerHostedZoneWest,ParameterValue=$LOAD_BALANCER_HOSTEDZONE_WEST \
+                 ParameterKey=DNSHostedZone,ParameterValue=$DNS_HOSTED_ZONE_ID                         \
+                 ParameterKey=DNSDomainName,ParameterValue=$DNS_HOSTED_ZONE_NAME                       \
+                 ParameterKey=DNSHealthcheckIdEast,ParameterValue=$ROUTE53_HEALTHCHECKID_CELL1         \
+                 ParameterKey=DNSHealthcheckIdWest,ParameterValue=$ROUTE53_HEALTHCHECKID_CELL2 </code></pre>
+<h2 id="question-or-feedback">Question or feedback?</h2>
+<p>Send your questions or feedback to <a href="mailto:stormacq@amazon.com">stormacq@amazon.com</a></p>
+</body>
+</html>
