@@ -1,17 +1,16 @@
-import { Stack, StackProps, CfnOutput } from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-import { aws_dynamodb as dynamodb } from 'aws-cdk-lib';
+import cdk = require('@aws-cdk/core');
+import dynamodb = require('@aws-cdk/aws-dynamodb');
 
-export interface DynamoDBProps extends StackProps {
+export interface DynamoDBProps extends cdk.StackProps {
   replicationRegions: string[]
 }
 
-export class TictactoeDatabaseCdkStack extends Stack {
+export class TictactoeDatabaseCdkStack extends cdk.Stack {
 
   // this is class level because it is shared with the app stack
   public table : dynamodb.Table
 
-  constructor(scope: Construct, id: string, props: DynamoDBProps) {
+  constructor(scope: cdk.App, id: string, props: DynamoDBProps) {
     super(scope, id, props);
 
     this.table = new dynamodb.Table(this, 'Table', {
@@ -34,7 +33,7 @@ export class TictactoeDatabaseCdkStack extends Stack {
     });
 
     // output for easy integration with other AWS services 
-    new CfnOutput(this, 'ARNDatabaseTable', { value: this.table.tableArn });
+    new cdk.CfnOutput(this, 'ARNDatabaseTable', { value: this.table.tableArn });
     
   }
 }

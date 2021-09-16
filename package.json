@@ -13,15 +13,29 @@
   "devDependencies": {
     "@types/jest": "^26.0.10",
     "@types/node": "16.3.1",
-    "aws-cdk": "2.0.0-rc.11",
+    "@aws-cdk/aws-autoscaling": "*",
+    "@aws-cdk/aws-ec2": "*",
+    "@aws-cdk/aws-eks": "*",
+    "@aws-cdk/aws-iam": "*",
+    "@aws-cdk/aws-dynamodb": "*",
+    "@aws-cdk/aws-synthetics": "*",
+    "@aws-cdk/core": "*",
+    "aws-cdk": "*",
     "jest": "^27.0.0",
     "ts-jest": "^27.0.0",
     "ts-node": "^10.0.0",
-    "typescript": "~4.3.5"
+    "typescript": "^4.3.5"
   },
   "dependencies": {
-    "aws-cdk-lib": "2.0.0-rc.11",
-    "constructs": "^10.0.0",
+    "@aws-cdk/aws-autoscaling": "*",
+    "@aws-cdk/aws-ec2": "*",
+    "@aws-cdk/aws-eks": "*",
+    "@aws-cdk/aws-iam": "*",
+    "@aws-cdk/aws-cloudwatch": "*",
+    "@aws-cdk/aws-dynamodb": "*",
+    "@aws-cdk/aws-synthetics": "*",
+    "@aws-cdk/core": "*",
+    "aws-cdk": "*",
     "source-map-support": "^0.5.16"
   }
 }

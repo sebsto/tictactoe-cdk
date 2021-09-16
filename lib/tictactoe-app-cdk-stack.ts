@@ -1,19 +1,19 @@
-import { Duration, CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
-import { Construct } from 'constructs';
+import cdk = require('@aws-cdk/core');
+import dynamodb = require('@aws-cdk/aws-dynamodb');
+import ec2 = require('@aws-cdk/aws-ec2');
+import autoscaling = require('@aws-cdk/aws-autoscaling');
+import cloudwatch = require('@aws-cdk/aws-cloudwatch');
+import elbv2 = require('@aws-cdk/aws-elasticloadbalancingv2');
+import iam = require('@aws-cdk/aws-iam');
+import synthetics = require('@aws-cdk/aws-synthetics');
+import * as path from 'path';
 
-import { aws_dynamodb as dynamodb } from 'aws-cdk-lib';
-
-import { aws_ec2 as ec2 } from 'aws-cdk-lib';
-import { aws_autoscaling as autoscaling } from 'aws-cdk-lib';
-import { aws_elasticloadbalancingv2 as elbv2 } from 'aws-cdk-lib';
-import { aws_iam as iam } from 'aws-cdk-lib';
-
-export interface ASGProps extends StackProps {
+export interface ASGProps extends cdk.StackProps {
   table: dynamodb.Table
 }
 
-export class TictactoeAppCdkStack extends Stack {
-  constructor(scope: Construct, id: string, props?: ASGProps) {
+export class TictactoeAppCdkStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props?: ASGProps) {
     super(scope, id, props);
 
     /********************************************
@@ -48,8 +48,10 @@ export class TictactoeAppCdkStack extends Stack {
     const dynamoDBRole = new iam.Role(this, 'TicTacToeRole', {
       assumedBy: new iam.ServicePrincipal('ec2.amazonaws.com')
     });
-    // allow the role to read / write on the table
+    let dynamo_describe: string = 'dynamodb:DescribeTable';
+    // allow the role to read / write on the table, and also describe table
     props?.table.grantReadWriteData(dynamoDBRole);
+    props?.table.grant(dynamoDBRole, dynamo_describe);
 
     //
     // define a user data script to install & launch a web server on the application instance
@@ -89,7 +91,7 @@ export class TictactoeAppCdkStack extends Stack {
 
       // we trust the health check from the load balancer
       healthCheck: autoscaling.HealthCheck.elb( {
-        grace: Duration.seconds(30)
+        grace: cdk.Duration.seconds(30)
       } )
     });
 
@@ -134,16 +136,43 @@ export class TictactoeAppCdkStack extends Stack {
     // target to the listener.
     listener.addTargets('TicTacToeFleet', {
       port: 8080,
-      stickinessCookieDuration: Duration.hours(1),
+      stickinessCookieDuration: cdk.Duration.hours(1),
       targets: [asg]
     });    
 
+    // Add CloudWatch Synthetics Canary
+    const canary = new synthetics.Canary(this, 'TicTacToeCanary', {
+      schedule: synthetics.Schedule.rate(cdk.Duration.minutes(1)),
+      test: synthetics.Test.custom({
+        code: synthetics.Code.fromAsset(path.join(__dirname, 'canary')),
+        handler: 'canary.handler',
+      }),
+      runtime: synthetics.Runtime.SYNTHETICS_NODEJS_PUPPETEER_3_1,
+      environmentVariables: {
+          ENDPOINT: lb.loadBalancerDnsName
+      },
+    });
+    const canarySuccessPercent = canary.metricSuccessPercent({
+      period: cdk.Duration.minutes(5),
+    });
+    const canary_alarm = new cloudwatch.Alarm(this, 'TicTacToeCanaryAlarm', {
+      metric: canarySuccessPercent,
+      evaluationPeriods: 1,
+      threshold: 95,
+      comparisonOperator: cloudwatch.ComparisonOperator.LESS_THAN_THRESHOLD,
+    });
+
+    // output for user to track alarm
+    new cdk.CfnOutput(this, "CanaryAlarmName", { value: canary_alarm.alarmName })
+    new cdk.CfnOutput(this, "CanaryAlarmARN", { value: canary_alarm.alarmArn})
+    new cdk.CfnOutput(this, "CanaryID", { value: canary.canaryId })
+
     // output the Load Balancer DNS Name for easy retrieval
-    new CfnOutput(this, 'LoadBalancerDNSName', { value: lb.loadBalancerDnsName });
+    new cdk.CfnOutput(this, 'LoadBalancerDNSName', { value: lb.loadBalancerDnsName });
 
     // output for easy integration with other AWS services 
-    new CfnOutput(this, 'ARNLoadBalancer', { value: lb.loadBalancerArn });
-    new CfnOutput(this, 'HostedZoneLoadBalancer', { value: lb.loadBalancerCanonicalHostedZoneId });
-    new CfnOutput(this, 'ARNAutoScalingGroup', { value: asg.autoScalingGroupArn });
+    new cdk.CfnOutput(this, 'ARNLoadBalancer', { value: lb.loadBalancerArn });
+    new cdk.CfnOutput(this, 'HostedZoneLoadBalancer', { value: lb.loadBalancerCanonicalHostedZoneId });
+    new cdk.CfnOutput(this, 'ARNAutoScalingGroup', { value: asg.autoScalingGroupArn });
   }
 }

@@ -22,6 +22,8 @@ LOAD_BALANCER_1_ARN=$(cat $CDK_OUTPUT_FILE | jq .\"TictactoeAppCdkStack-us-east-
 LOAD_BALANCER_2_ARN=$(cat $CDK_OUTPUT_FILE | jq .\"TictactoeAppCdkStack-us-west-2\".ARNLoadBalancer -r)
 AUTO_SCALINGGROUP_1_ARN=$(cat $CDK_OUTPUT_FILE | jq .\"TictactoeAppCdkStack-us-east-1\".ARNAutoScalingGroup -r)
 AUTO_SCALINGGROUP_2_ARN=$(cat $CDK_OUTPUT_FILE | jq .\"TictactoeAppCdkStack-us-west-2\".ARNAutoScalingGroup -r)
+CANARY_1_ARN=$(cat $CDK_OUTPUT_FILE | jq .\"TictactoeAppCdkStack-us-east-1\".CanaryAlarmARN -r)
+CANARY_2_ARN=$(cat $CDK_OUTPUT_FILE | jq .\"TictactoeAppCdkStack-us-west-2\".CanaryAlarmARN -r)
 DYNAMODB_TABLE_ARN=$(cat $CDK_OUTPUT_FILE | jq .TictactoeDatabaseCdkStack.ARNDatabaseTable -r)
 aws --region $REGION cloudformation create-stack               \
     --template-body file://./Route53-ARC-readiness-check.yaml  \
@@ -32,4 +34,6 @@ aws --region $REGION cloudformation create-stack               \
                  ParameterKey=LoadBalancer2,ParameterValue=$LOAD_BALANCER_2_ARN         \
                  ParameterKey=AutoScalingGroup1,ParameterValue=$AUTO_SCALINGGROUP_1_ARN \
                  ParameterKey=AutoScalingGroup2,ParameterValue=$AUTO_SCALINGGROUP_2_ARN \
+                 ParameterKey=Canary1,ParameterValue=$CANARY_1_ARN \
+                 ParameterKey=Canary2,ParameterValue=$CANARY_2_ARN \
                  ParameterKey=DynamoDBTable,ParameterValue=$DYNAMODB_TABLE_ARN          \

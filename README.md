@@ -8,11 +8,19 @@ This scripts is made of two stacks :
 
 The application stack is created both in `us-east-1` and `us-west-2` regions.
 
+### Synthetic monitoring
+
+The stack now includes CloudWatch synthetic monitoring (canaries).  The canaries attempt to log in to the tic-tac-toe game and start a game, in order to make sure that the web app is functional.  We use a CloudWatch alarm to monitor the canary success rate, setting the alarm to trigger if the success rate drops below 95% over a five-minute interval.  Right now we just use the canary as an additional readiness check in each cell, for the sake of visibility.  You could make use of the canaries in other ways:
+
+* As a trigger for automated failover, having the alarm cause a state change in the routing controls.  (Be wary of automating regional failover based on health checks though.)
+* As a safety rule in a cell, for example preventing failover if the web app in a cell is unresponsive or exhibiting high response latency.
+
 ## Pre-requisites
 
 The very first time, be sure to run 
 
 ```zsh 
+npm install
 cdk bootstrap
 ```
 
