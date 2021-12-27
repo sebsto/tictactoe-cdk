@@ -143,7 +143,7 @@ To deploy the routing control template, open a terminal and type the following:
 # assuming you're in the main directory of this project
 cd scripts
 
-./Route53-create-routing-control.sh
+./Route53-create-routing-controls.sh
 ```
 
 Alternatively, if you want to invoke CloudFormation by using the AWS CLI, you can issue a command similar to the following:
