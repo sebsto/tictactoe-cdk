@@ -30,7 +30,7 @@ export class TictactoeAppCdkStack extends Stack {
         name: 'load balancer',
         cidrMask: 24,
       }, {
-        subnetType: ec2.SubnetType.PRIVATE,
+        subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
         name: 'application',
         cidrMask: 24
       }]
