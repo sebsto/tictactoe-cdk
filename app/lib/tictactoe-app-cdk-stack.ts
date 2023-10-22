@@ -24,7 +24,7 @@ export class TictactoeAppCdkStack extends Stack {
     const vpc = new ec2.Vpc(this, 'TicTacToeVPC', {
       natGateways: 1, //default value but better to make it explicit
       maxAzs: 2,
-      cidr: '10.0.0.0/16',
+      // cidr: '10.0.0.0/16',
       subnetConfiguration: [{
         subnetType: ec2.SubnetType.PUBLIC,
         name: 'load balancer',
