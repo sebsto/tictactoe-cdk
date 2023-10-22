@@ -59,7 +59,7 @@ export class TictactoeAppCdkStack extends Stack {
       'curl -O https://bootstrap.pypa.io/get-pip.py',
       'python3 get-pip.py',
 
-      'wget https://github.com/sebsto/tictactoe-dynamodb/releases/download/v01/tictactoe-app.zip',
+      'wget https://github.com/sebsto/tictactoe-dynamodb/releases/download/v02/tictactoe-app.zip',
       'mkdir tictactoe-app && cd tictactoe-app',
 
       'unzip ../tictactoe-app.zip',
