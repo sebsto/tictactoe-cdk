@@ -4,14 +4,16 @@ import * as cdk from 'aws-cdk-lib';
 import { TictactoeAppCdkStack } from '../lib/tictactoe-app-cdk-stack';
 import { TictactoeDatabaseCdkStack } from '../lib/tictactoe-database-cdk-stack';
 
-const REGION=[ 'us-east-1', 'us-west-2'];
+// const REGION=[ 'us-east-1', 'us-west-2'];
+const REGION=[ 'us-west-2'];
 
 const app = new cdk.App();
 
 // the database stack 
-const dbStack = new TictactoeDatabaseCdkStack(app, 'TictactoeDatabaseCdkStack', {
-  replicationRegions: REGION
-});
+const dbStack = new TictactoeDatabaseCdkStack(app, 'TictactoeDatabaseCdkStack', 
+                        REGION.length > 1 ? { env: { region: REGION[0] } , replicationRegions: REGION} : 
+                                            { env: { region: REGION[0] } }
+);
 
 // one stack per app (auto-scaling) in each region 
 for (let r of REGION) {

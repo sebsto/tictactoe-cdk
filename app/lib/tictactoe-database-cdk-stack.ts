@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import { aws_dynamodb as dynamodb } from 'aws-cdk-lib';
 
 export interface DynamoDBProps extends StackProps {
-  replicationRegions: string[]
+  replicationRegions?: string[]
 }
 
 export class TictactoeDatabaseCdkStack extends Stack {
@@ -18,7 +18,7 @@ export class TictactoeDatabaseCdkStack extends Stack {
       partitionKey: { name: 'GameId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       replicationRegions: props.replicationRegions,
-      tableName: "Games"
+      // tableName: "Games"
     });
 
     // add secondary indexes
