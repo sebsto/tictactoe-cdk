@@ -7,6 +7,7 @@ import { aws_ec2 as ec2 } from 'aws-cdk-lib';
 import { aws_autoscaling as autoscaling } from 'aws-cdk-lib';
 import { aws_elasticloadbalancingv2 as elbv2 } from 'aws-cdk-lib';
 import { aws_iam as iam } from 'aws-cdk-lib';
+import { ManagedPolicy } from 'aws-cdk-lib/aws-iam';
 
 export interface ASGProps extends StackProps {
   table: dynamodb.Table
@@ -24,13 +25,12 @@ export class TictactoeAppCdkStack extends Stack {
     const vpc = new ec2.Vpc(this, 'TicTacToeVPC', {
       natGateways: 1, //default value but better to make it explicit
       maxAzs: 2,
-      // cidr: '10.0.0.0/16',
       subnetConfiguration: [{
         subnetType: ec2.SubnetType.PUBLIC,
         name: 'load balancer',
         cidrMask: 24,
       }, {
-        subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
         name: 'application',
         cidrMask: 24
       }]
@@ -56,14 +56,13 @@ export class TictactoeAppCdkStack extends Stack {
     //
     const installAppUserdata = ec2.UserData.forLinux();
     installAppUserdata.addCommands(
-      'curl -O https://bootstrap.pypa.io/get-pip.py',
-      'python3 get-pip.py',
-
       'wget https://github.com/sebsto/tictactoe-dynamodb/releases/download/v02/tictactoe-app.zip',
       'mkdir tictactoe-app && cd tictactoe-app',
 
       'unzip ../tictactoe-app.zip',
-      '/usr/local/bin/pip install -r requirements.txt',
+      'python3 -m venv .venv',
+      'source .venv/bin/activate',
+      'pip3 install -r requirements.txt',
 
       'USE_EC2_INSTANCE_METADATA=true python3 application.py --serverPort 8080'
     );
@@ -72,11 +71,10 @@ export class TictactoeAppCdkStack extends Stack {
       vpc,
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE4_GRAVITON, ec2.InstanceSize.MICRO),
 
-      // get the latest Amazon Linux 2 image for ARM64 CPU
-      machineImage: new ec2.AmazonLinuxImage({
+      // get the latest Amazon Linux 2023 image for ARM64 CPU 
+      machineImage: ec2.MachineImage.latestAmazonLinux2023({
         cpuType: ec2.AmazonLinuxCpuType.ARM_64,
-        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2 }
-      ), 
+      }),
 
       // role granting permission to read / write to DynamoDB table 
       role: dynamoDBRole,
@@ -95,17 +93,8 @@ export class TictactoeAppCdkStack extends Stack {
 
     // Create an IAM permission to allow the instances to connect to SSM 
     // just in case I need to debug the user data script  
-    const policySSM = {
-      Action: [
-        "ssmmessages:*",
-        "ssm:UpdateInstanceInformation",
-        "ec2messages:*"
-      ],
-      Resource: "*",
-      Effect: "Allow"
-    }
-
-    asg.addToRolePolicy(iam.PolicyStatement.fromJson(policySSM));
+    const ssmPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore");
+    asg.role.addManagedPolicy(ssmPolicy)
 
     /********************************************
      * Create the load balancer
